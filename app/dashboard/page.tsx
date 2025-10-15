@@ -7,7 +7,7 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       <div className="card">
-        <h1 className="text-2xl font-display mb-2">Dashboard — Your Working View</h1>
+        <h1 className="text-2xl font-display mb-2">The Loom — Live View</h1>
         <p className="opacity-80">Monitor patterns, track Weave Plans, and manage your needs.</p>
       </div>
       

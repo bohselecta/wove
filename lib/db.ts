@@ -219,7 +219,7 @@ export function getDB() {
     } as any
   }
 
-  // Local development
+  // Local development - don't close the connection, keep it open
   if (!db) {
     const dbPath = path.join(process.cwd(), 'wove.db')
     db = new Database(dbPath)

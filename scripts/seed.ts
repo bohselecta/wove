@@ -57,5 +57,5 @@ function seedFrictions(){
 seedSignals()
 seedRecipes()
 seedFrictions()
-db.close()
+// Don't close the database connection - keep it open for API routes
 console.log("Seeded Wove demo data.")
