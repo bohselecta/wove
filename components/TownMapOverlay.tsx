@@ -15,7 +15,7 @@ export default function TownMapOverlay() {
         .label { fill: #fff; font: 600 20px/1.2 Inter, system-ui, sans-serif; paint-order: stroke; stroke: rgba(0,0,0,.35); stroke-width: 3; }
         .dot  { fill: #fff; stroke: #ffffffaa; stroke-width: 3; }
         .ring { fill: none; stroke: #ffffff66; stroke-width: 3; }
-        .pulse { transform-origin: 0px 0px; animation: pulse 2.4s ease-in-out infinite; }
+        .pulse { transform-origin: center; animation: pulse 2.4s ease-in-out infinite; }
         @keyframes pulse { 0% { transform: scale(1); opacity: 0.8 } 60% { transform: scale(1.25); opacity: 0.2 } 100% { transform: scale(1); opacity: 0.8 } }
         @media (prefers-reduced-motion: reduce) { .pulse { animation: none } }
         /* Mobile: hide labels, keep dots large */
@@ -45,19 +45,6 @@ export default function TownMapOverlay() {
                 </Link>
               ))}
 
-              {/* DEV: click to log coordinates in viewBox space - TODO: remove after placing dots */}
-              <rect
-                x="0" y="0" width="1600" height="900"
-                fill="transparent"
-                onClick={(e) => {
-                  const svg = e.currentTarget.ownerSVGElement!;
-                  const pt = svg.createSVGPoint();
-                  pt.x = e.clientX; pt.y = e.clientY;
-                  const ctm = svg.getScreenCTM()!.inverse();
-                  const p = pt.matrixTransform(ctm);
-                  console.log(`{ x: ${Math.round(p.x)}, y: ${Math.round(p.y)} }`);
-                }}
-              />
             </svg>
   )
 }
