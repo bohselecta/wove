@@ -25,15 +25,15 @@ export default function TownMapOverlay() {
         a:focus-visible .dot { outline: 3px solid #4ea1ff; outline-offset: 4px }
       `}</style>
 
-      {[
-        { x: 250,  y: 240,  href: '/observatory' as const, text: 'Observatory' },
-        { x: 820,  y: 500,  href: '/library' as const,      text: 'Library' },
-        { x: 300,  y: 770,  href: '/workshop' as const,     text: 'Workshop' },
-        { x: 650,  y: 800,  href: '/commons' as const,      text: 'Commons' },
-        { x: 1160, y: 770,  href: '/park' as const,         text: 'Park' },
-        { x: 1280, y: 620,  href: '/bank' as const,         text: 'Bank' },
-        { x: 980,  y: 560,  href: '/' as const,             text: 'The Loom' },
-      ].map(({ x, y, href, text }) => (
+              {[
+                { x: 210,  y: 270,  href: '/observatory' as const, text: 'Observatory' },
+                { x: 640,  y: 510,  href: '/library' as const,      text: 'Library' },
+                { x: 280,  y: 690,  href: '/workshop' as const,     text: 'Workshop' },
+                { x: 540,  y: 730,  href: '/commons' as const,      text: 'Commons' },
+                { x: 880,  y: 700,  href: '/park' as const,         text: 'Park' },
+                { x: 970,  y: 630,  href: '/bank' as const,         text: 'Bank' },
+                { x: 740,  y: 560,  href: '/' as const,             text: 'The Loom' },
+              ].map(({ x, y, href, text }) => (
         <Link key={href} href={href} aria-label={text}>
           {/* group preserves keyboard focus in Safari/iOS */}
           <g transform={`translate(${x},${y})`} className="cursor-pointer">
