@@ -1,5 +1,6 @@
 import './globals.css'
 import type { Metadata } from 'next'
+import Image from 'next/image'
 
 export const metadata: Metadata = {
   title: "Wove — The Living Loom",
@@ -12,7 +13,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-screen font-body">
         <header className="sticky top-0 z-50 backdrop-blur bg-black/30 border-b border-white/10">
           <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
-            <div className="font-display text-lg tracking-wide">🕸️ Wove</div>
+            <div className="flex items-center">
+              <Image
+                src="/images/wove-logo.svg"
+                alt="Wove"
+                width={120}
+                height={32}
+                className="h-8 w-auto"
+                priority
+              />
+            </div>
             <nav className="flex gap-4 text-sm">
               <a href="/" className="hover:underline">The Loom</a>
               <a href="/dashboard" className="hover:underline">Dashboard</a>
