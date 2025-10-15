@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 type Proof = { id:string; room_id:string; kind:string; url?:string|null; text?:string|null; created_at:string }
 
 export default function RoomProofs({ roomId }:{ roomId: string }) {
@@ -7,8 +7,11 @@ export default function RoomProofs({ roomId }:{ roomId: string }) {
   const [kind, setKind] = useState<'text'|'link'|'image'|'file'>('text')
   const [text, setText] = useState(''); const [url, setUrl] = useState('')
 
-  async function load(){ setList(await fetch(`/api/proofs?roomId=${roomId}`).then(r=>r.json())) }
-  useEffect(()=>{ load() }, [roomId, load])
+  const load = useCallback(async () => {
+    setList(await fetch(`/api/proofs?roomId=${roomId}`).then(r=>r.json()))
+  }, [roomId])
+  
+  useEffect(()=>{ load() }, [load])
 
   async function add(e: React.FormEvent){
     e.preventDefault()
