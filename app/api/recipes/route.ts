@@ -13,12 +13,17 @@ type RecipeRow = {
 }
 
 export async function GET() {
-  const db = getDB()
-  const rows = db.prepare(`select * from recipes order by p_total desc limit 10`).all() as RecipeRow[]
-  const data = rows.map(r => ({
-    id: r.id, title: r.title, summary: r.summary,
-    priority: { impact:r.p_impact, feasibility:r.p_feasibility, urgency:r.p_urgency, equity:r.p_equity, total:r.p_total }
-  }))
-  db.close()
-  return NextResponse.json(data)
+  try {
+    const db = await getDB()
+    const rows = await db.all<RecipeRow>(`select * from recipes order by p_total desc limit 10`)
+    const data = rows.map(r => ({
+      id: r.id, title: r.title, summary: r.summary,
+      priority: { impact:r.p_impact, feasibility:r.p_feasibility, urgency:r.p_urgency, equity:r.p_equity, total:r.p_total }
+    }))
+    if (db.close) db.close()
+    return NextResponse.json(data)
+  } catch (error) {
+    console.error('Error fetching recipes:', error)
+    return NextResponse.json({ error: 'Failed to fetch recipes' }, { status: 500 })
+  }
 }

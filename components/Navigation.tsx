@@ -3,7 +3,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 
 const navigationItems = [
-  { href: '/' as const, label: 'The Loom' },
+  { href: '/' as const, label: 'The Wove' },
   { href: '/dashboard' as const, label: 'Dashboard' },
   { href: '/library' as const, label: 'The Library' },
   { href: '/workshop' as const, label: 'The Workshop' },

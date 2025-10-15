@@ -5,7 +5,7 @@ import Link from 'next/link'
 import Navigation from '../components/Navigation'
 
 export const metadata: Metadata = {
-  title: "Wove — The Living Loom",
+  title: "Wove — The Living Weave",
   description: "A virtual small town for doing measurable good.",
 }
 

@@ -12,9 +12,48 @@ type SignalTop = {
 
 export function Observatory(){
   const [signals, setSignals] = useState<SignalTop[]>([])
-  useEffect(()=>{
-    fetch('/api/signals/top').then(r=>r.json()).then(setSignals).catch(()=>{})
-  },[])
+  const [loading, setLoading] = useState(true)
+  
+  const fetchSignals = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch('/api/signals/top')
+      if (response.ok) {
+        const data = await response.json()
+        setSignals(data)
+      } else {
+        console.error('Failed to fetch signals:', response.status)
+      }
+    } catch (error) {
+      console.error('Error fetching signals:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchSignals()
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="card opacity-50">
+          <div className="animate-pulse">
+            <div className="h-4 bg-white/20 rounded mb-2"></div>
+            <div className="h-6 bg-white/20 rounded mb-2"></div>
+            <div className="flex gap-2">
+              <div className="h-6 w-16 bg-white/20 rounded"></div>
+              <div className="h-6 w-16 bg-white/20 rounded"></div>
+              <div className="h-6 w-16 bg-white/20 rounded"></div>
+              <div className="h-6 w-16 bg-white/20 rounded"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
       {signals.map(s => (

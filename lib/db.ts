@@ -1,13 +1,19 @@
-import Database from 'better-sqlite3'
-import path from 'path'
 import fs from 'fs'
+import path from 'path'
 
-// Vercel-compatible database handling
-const isVercel = process.env.VERCEL === '1'
+const isProd = process.env.NODE_ENV === 'production'
+const POSTGRES_URL = process.env.DATABASE_URL || ''
 
-let db: Database.Database | null = null
+type Row = Record<string, any>
 
-// Sample data for Vercel deployment
+export interface DB {
+  all<T = Row>(sql: string, params?: any[]): Promise<T[]>
+  get<T = Row>(sql: string, params?: any[]): Promise<T | undefined>
+  run(sql: string, params?: any[]): Promise<void>
+  close?(): void
+}
+
+// Sample data for development and fallback
 const sampleData = {
   signals_top: [
     {
@@ -160,69 +166,206 @@ const sampleData = {
       text: 'Students need better internet access for remote learning',
       createdAt: '2024-01-13T14:15:00Z'
     }
+  ],
+  common_rooms: [
+    {
+      id: '1',
+      title: 'Community Solar Initiative',
+      planId: '1',
+      status: 'active',
+      createdAt: '2024-01-15T09:00:00Z'
+    }
+  ],
+  tasks: [
+    {
+      id: '1',
+      roomId: '1',
+      title: 'Survey community buildings for solar potential',
+      assignee: 'Sarah Chen',
+      due: '2024-01-20T00:00:00Z',
+      completed: 0
+    },
+    {
+      id: '2',
+      roomId: '1',
+      title: 'Research local solar incentives and grants',
+      assignee: 'Mike Rodriguez',
+      due: '2024-01-22T00:00:00Z',
+      completed: 1
+    },
+    {
+      id: '3',
+      roomId: '1',
+      title: 'Draft proposal for community solar program',
+      assignee: 'Lisa Park',
+      due: '2024-01-25T00:00:00Z',
+      completed: 0
+    }
   ]
 }
 
-if (!isVercel) {
-  // Local development with SQLite
-  const dbPath = path.join(process.cwd(), 'wove.db')
-
-  if (!fs.existsSync(dbPath)) {
-    const touch = new Database(dbPath)
-    touch.exec(`
+export async function getDB(): Promise<DB> {
+  if (!isProd) {
+    // Local: better-sqlite3
+    const Database = (await import('better-sqlite3')).default
+    const dbPath = path.join(process.cwd(), 'wove.db')
+    
+    // Ensure directory exists
+    const dir = path.dirname(dbPath)
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true })
+    }
+    
+    const db = new Database(dbPath)
+    
+    // Bootstrap tables
+    db.exec(`
       create table if not exists signals_top (
-        id text primary key,
-        source text,
-        topic text,
-        time text,
-        claim text,
-        gi_planet real,
-        gi_people real,
-        gi_democracy real,
-        gi_learning real
+        id text primary key, source text, topic text, time text, claim text,
+        gi_planet real, gi_people real, gi_democracy real, gi_learning real
       );
       create table if not exists frictions (
-        id text primary key,
-        text text,
-        createdAt text
+        id text primary key, text text, createdAt text
       );
       create table if not exists recipes (
+        id text primary key, title text, summary text,
+        p_impact real, p_feasibility real, p_urgency real, p_equity real, p_total real
+      );
+      create table if not exists common_rooms (
         id text primary key,
-        title text,
-        summary text,
-        p_impact real,
-        p_feasibility real,
-        p_urgency real,
-        p_equity real,
-        p_total real
+        title text not null,
+        plan_id text,
+        status text default 'open',
+        created_at text
+      );
+      create table if not exists tasks (
+        id text primary key,
+        room_id text not null,
+        title text not null,
+        assignee text,
+        due text,
+        status text default 'todo',
+        created_at text
       );
     `)
-    touch.close()
-  }
-}
-
-export function getDB() {
-  if (isVercel) {
-    // Return a mock database object for Vercel
+    
+    // Seed with sample data if tables are empty
+    const signalCount = db.prepare('select count(*) as count from signals_top').get() as { count: number }
+    if (signalCount.count === 0) {
+      const insertSignal = db.prepare(`
+        insert into signals_top (id, source, topic, time, claim, gi_planet, gi_people, gi_democracy, gi_learning)
+        values (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `)
+      sampleData.signals_top.forEach(signal => {
+        insertSignal.run(signal.id, signal.source, signal.topic, signal.time, signal.claim,
+          signal.gi_planet, signal.gi_people, signal.gi_democracy, signal.gi_learning)
+      })
+    }
+    
+    const frictionCount = db.prepare('select count(*) as count from frictions').get() as { count: number }
+    if (frictionCount.count === 0) {
+      const insertFriction = db.prepare('insert into frictions (id, text, createdAt) values (?, ?, ?)')
+      sampleData.frictions.forEach(friction => {
+        insertFriction.run(friction.id, friction.text, friction.createdAt)
+      })
+    }
+    
+    const recipeCount = db.prepare('select count(*) as count from recipes').get() as { count: number }
+    if (recipeCount.count === 0) {
+      const insertRecipe = db.prepare(`
+        insert into recipes (id, title, summary, p_impact, p_feasibility, p_urgency, p_equity, p_total)
+        values (?, ?, ?, ?, ?, ?, ?, ?)
+      `)
+      sampleData.recipes.forEach(recipe => {
+        insertRecipe.run(recipe.id, recipe.title, recipe.summary, recipe.p_impact, recipe.p_feasibility,
+          recipe.p_urgency, recipe.p_equity, recipe.p_total)
+      })
+    }
+    
+    const roomCount = db.prepare('select count(*) as count from common_rooms').get() as { count: number }
+    if (roomCount.count === 0) {
+      const insertRoom = db.prepare('insert into common_rooms (id, title, plan_id, status, created_at) values (?, ?, ?, ?, ?)')
+      sampleData.common_rooms.forEach(room => {
+        insertRoom.run(room.id, room.title, room.planId, room.status, room.createdAt)
+      })
+    }
+    
+    const taskCount = db.prepare('select count(*) as count from tasks').get() as { count: number }
+    if (taskCount.count === 0) {
+      const insertTask = db.prepare('insert into tasks (id, room_id, title, assignee, due, status, created_at) values (?, ?, ?, ?, ?, ?, ?)')
+      sampleData.tasks.forEach(task => {
+        insertTask.run(task.id, task.roomId, task.title, task.assignee, task.due, 'todo', new Date().toISOString())
+      })
+    }
+    
     return {
-      prepare: (query: string) => ({
-        all: () => {
-          if (query.includes('signals_top')) return sampleData.signals_top
-          if (query.includes('recipes')) return sampleData.recipes
-          if (query.includes('frictions')) return sampleData.frictions
-          return []
-        },
-        get: () => null,
-        run: () => ({ changes: 0 })
-      }),
-      close: () => {}
-    } as any
+      all: async (sql, params = []) => db.prepare(sql).all(params),
+      get: async (sql, params = []) => db.prepare(sql).get(params),
+      run: async (sql, params = []) => { db.prepare(sql).run(params) },
+      close: () => db.close(),
+    }
   }
 
-  // Local development - don't close the connection, keep it open
-  if (!db) {
-    const dbPath = path.join(process.cwd(), 'wove.db')
-    db = new Database(dbPath)
+  // Prod: Neon Postgres
+  if (POSTGRES_URL) {
+    const { neon } = await import('@neondatabase/serverless')
+    const sql = neon(POSTGRES_URL)
+    
+    // Bootstrap tables (idempotent)
+    await sql(`
+      create table if not exists signals_top (
+        id text primary key, source text, topic text, time text, claim text,
+        gi_planet float, gi_people float, gi_democracy float, gi_learning float
+      );
+      create table if not exists frictions (
+        id text primary key, text text, createdAt text
+      );
+      create table if not exists recipes (
+        id text primary key, title text, summary text,
+        p_impact float, p_feasibility float, p_urgency float, p_equity float, p_total float
+      );
+      create table if not exists common_rooms (
+        id text primary key,
+        title text not null,
+        plan_id text,
+        status text default 'open',
+        created_at text
+      );
+      create table if not exists tasks (
+        id text primary key,
+        room_id text not null,
+        title text not null,
+        assignee text,
+        due text,
+        status text default 'todo',
+        created_at text
+      );
+    `)
+    
+    return {
+      all: async <T = Row>(s: string, p: any[] = []) => (await sql(s, p)) as T[],
+      get: async <T = Row>(s: string, p: any[] = []) => ((await sql(s, p)) as T[])[0],
+      run: async (s: string, p: any[] = []) => { await sql(s, p) },
+    }
   }
-  return db
+
+  // Fallback: return mock database for development
+  return {
+    all: async <T = Row>(query: string) => {
+      if (query.includes('signals_top')) return sampleData.signals_top as T[]
+      if (query.includes('recipes')) return sampleData.recipes as T[]
+      if (query.includes('frictions')) return sampleData.frictions as T[]
+      if (query.includes('common_rooms')) return sampleData.common_rooms as T[]
+      if (query.includes('tasks')) return sampleData.tasks as T[]
+      return [] as T[]
+    },
+    get: async <T = Row>(query: string) => {
+      const results = await this.all<T>(query)
+      return results[0]
+    },
+    run: async (query: string) => {
+      // Mock implementation - in real scenario this would modify data
+      console.log('Mock DB run:', query)
+    },
+  }
 }

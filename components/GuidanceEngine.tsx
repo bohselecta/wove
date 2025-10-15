@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 
 type Recipe = {
   id: string
@@ -27,6 +28,14 @@ export function GuidanceEngine(){
             <span className="badge">Feas {r.priority.feasibility.toFixed(1)}</span>
             <span className="badge">Urg {r.priority.urgency.toFixed(1)}</span>
             <span className="badge">Equity {r.priority.equity.toFixed(1)}</span>
+          </div>
+          <div className="mt-3">
+            <Link 
+              href={`/commons?planId=${r.id}`}
+              className="badge hover:bg-white/15 transition-colors"
+            >
+              Open in Common Room →
+            </Link>
           </div>
         </div>
       ))}

@@ -14,16 +14,21 @@ type SignalRow = {
 }
 
 export async function GET() {
-  const db = getDB()
-  const rows = db.prepare(`select * from signals_top order by time desc limit 20`).all() as SignalRow[]
-  const data = rows.map(r => ({
-    id: r.id,
-    source: r.source,
-    topic: r.topic,
-    time: r.time,
-    claim: r.claim,
-    gi: { planet:r.gi_planet, people:r.gi_people, democracy:r.gi_democracy, learning:r.gi_learning }
-  }))
-  db.close()
-  return NextResponse.json(data)
+  try {
+    const db = await getDB()
+    const rows = await db.all<SignalRow>(`select * from signals_top order by time desc limit 20`)
+    const data = rows.map(r => ({
+      id: r.id,
+      source: r.source,
+      topic: r.topic,
+      time: r.time,
+      claim: r.claim,
+      gi: { planet:r.gi_planet, people:r.gi_people, democracy:r.gi_democracy, learning:r.gi_learning }
+    }))
+    if (db.close) db.close()
+    return NextResponse.json(data)
+  } catch (error) {
+    console.error('Error fetching signals:', error)
+    return NextResponse.json({ error: 'Failed to fetch signals' }, { status: 500 })
+  }
 }
