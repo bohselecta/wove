@@ -1,105 +1,74 @@
 import { NextResponse } from 'next/server'
 import { getDB } from '../../../lib/db'
-import { randomUUID } from 'crypto'
+import Parser from 'rss-parser'
+import { randomUUID, createHash } from 'crypto'
 
-// --- MOCK SIGNAL SOURCES (later, replace with real feeds) ---
-const mockFeeds = [
-  {
-    topic: 'Climate Action',
-    source: 'World Resources Institute',
-    claim: 'Global CO₂ emissions have plateaued in 2025 after significant renewable investments.',
-    gi_planet: 0.85,
-    gi_people: 0.65,
-    gi_democracy: 0.4,
-    gi_learning: 0.55,
-  },
-  {
-    topic: 'Education Access',
-    source: 'UNESCO Education Index',
-    claim: 'Digital literacy initiatives improved rural connectivity in 10 new regions this quarter.',
-    gi_planet: 0.35,
-    gi_people: 0.8,
-    gi_democracy: 0.5,
-    gi_learning: 0.9,
-  },
-  {
-    topic: 'Public Health',
-    source: 'WHO Weekly Bulletin',
-    claim: 'Early community detection systems reduced disease spread in pilot towns by 40%.',
-    gi_planet: 0.6,
-    gi_people: 0.9,
-    gi_democracy: 0.45,
-    gi_learning: 0.7,
-  },
-  {
-    topic: 'Civic Participation',
-    source: 'OpenGov Watch',
-    claim: 'Local town forums using AI co-deliberation tools increased attendance by 22%.',
-    gi_planet: 0.3,
-    gi_people: 0.7,
-    gi_democracy: 0.9,
-    gi_learning: 0.65,
-  },
-  {
-    topic: 'Sustainable Food Systems',
-    source: 'FAO Food Index',
-    claim: 'Regenerative farming methods led to 15% higher yield in degraded soil regions.',
-    gi_planet: 0.88,
-    gi_people: 0.7,
-    gi_democracy: 0.35,
-    gi_learning: 0.55,
-  },
+const parser = new Parser()
+// Start small; expand later
+const FEEDS = [
+  'https://news.un.org/feed/subscribe/en/news/topic/climate-change/feed/rss.xml',
+  'https://www.who.int/feeds/entity/mediacentre/news/en/rss.xml',
+  'https://rss.nytimes.com/services/xml/rss/nyt/Education.xml',
 ]
 
-// --- INGEST ROUTE HANDLER ---
+function hashKey(s: string) {
+  return createHash('sha256').update(s).digest('hex').slice(0, 32)
+}
+
 export async function GET() {
-  try {
-    const db = await getDB()
-    const now = new Date().toISOString()
-    let insertedCount = 0
+  const db = await getDB()
+  let inserted = 0
 
-    // Insert mock signals (avoid duplicates by topic)
-    for (const feed of mockFeeds) {
-      const existing = await db.get(
-        'select id from signals_top where topic = ?',
-        [feed.topic]
-      )
-      if (!existing) {
-        await db.run(
-          `insert into signals_top (
-            id, source, topic, time, claim,
-            gi_planet, gi_people, gi_democracy, gi_learning
-          ) values (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-          [
-            randomUUID(),
-            feed.source,
-            feed.topic,
-            now,
-            feed.claim,
-            feed.gi_planet,
-            feed.gi_people,
-            feed.gi_democracy,
-            feed.gi_learning,
-          ]
+  for (const url of FEEDS) {
+    try {
+      const feed = await parser.parseURL(url)
+      for (const item of (feed.items || []).slice(0, 6)) {
+        const link = item.link || ''
+        const title = item.title || ''
+        const pub = item.isoDate || item.pubDate || ''
+        const source_key = hashKey(link || (title + pub + url))
+        const claim = title
+        const topic =
+          /climate/i.test(feed.title || '') ? 'Climate Action' :
+          /health|who/i.test(feed.title || '') ? 'Public Health' :
+          /education|learning/i.test(feed.title || '') ? 'Education Access' :
+          'Civic Participation'
+
+        // naive GI heuristic (can refine later)
+        const gi_planet = /climate|energy|forest|emissions/i.test(claim) ? 0.8 : 0.3
+        const gi_people = /health|care|wellbeing|education|students/i.test(claim) ? 0.8 : 0.4
+        const gi_democracy = /vote|civic|policy|govern/i.test(claim) ? 0.7 : 0.3
+        const gi_learning = /education|learning|research|training/i.test(claim) ? 0.8 : 0.5
+
+        // Upsert by source_key
+        const exists = await db.get<{ id: string }>(
+          'select id from signals_top where source_key = ?',
+          [source_key]
         )
-        insertedCount++
+        if (!exists) {
+          await db.run(
+            `insert into signals_top
+              (id, source, topic, time, claim, gi_planet, gi_people, gi_democracy, gi_learning, source_key)
+             values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+              randomUUID(),
+              (feed.title || url).slice(0, 140),
+              topic,
+              new Date(pub || Date.now()).toISOString(),
+              claim.slice(0, 400),
+              gi_planet, gi_people, gi_democracy, gi_learning,
+              source_key,
+            ]
+          )
+          inserted++
+        }
       }
+    } catch (e) {
+      console.error('Ingest failed for', url, e)
     }
-
-    if (db.close) db.close()
-
-    return NextResponse.json({ 
-      success: true, 
-      inserted: insertedCount,
-      message: `Ingested ${insertedCount} new signals from ${mockFeeds.length} sources`
-    })
-  } catch (error) {
-    console.error('Error ingesting signals:', error)
-    return NextResponse.json({ 
-      success: false, 
-      error: 'Failed to ingest signals' 
-    }, { status: 500 })
   }
+
+  return NextResponse.json({ success: true, inserted })
 }
 
 // --- MANUAL INGEST TRIGGER (for testing) ---

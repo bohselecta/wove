@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { randomUUID } from 'crypto'
 import { getDB } from '../../../../../lib/db'
+import { requireUserId } from '@/lib/auth'
 
 export async function GET(_: Request, { params }: { params: { id: string } }) {
   try {
@@ -18,6 +19,7 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
 
 export async function POST(req: Request, { params }: { params: { id: string } }) {
   try {
+    const userId = await requireUserId()
     const db = await getDB()
     const { title, assignee, due } = await req.json()
     
@@ -45,6 +47,9 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     
     return NextResponse.json({ success: true, task })
   } catch (error) {
+    if (error instanceof Error && error.message === 'UNAUTHORIZED') {
+      return NextResponse.json({ error: 'unauthorized', hint: 'Sign in to continue' }, { status: 401 })
+    }
     console.error('Error creating task:', error)
     return NextResponse.json({ error: 'Failed to create task' }, { status: 500 })
   }

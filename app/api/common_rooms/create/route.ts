@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server'
 import { randomUUID } from 'crypto'
 import { getDB } from '../../../../lib/db'
+import { requireUserId } from '@/lib/auth'
 
 export async function POST(req: Request) {
   try {
+    const userId = await requireUserId()
     const db = await getDB()
     const { planId, title } = await req.json()
 
@@ -22,6 +24,9 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true, room: { id, title, planId, status: 'open' } })
   } catch (error) {
+    if (error instanceof Error && error.message === 'UNAUTHORIZED') {
+      return NextResponse.json({ error: 'unauthorized', hint: 'Sign in to continue' }, { status: 401 })
+    }
     console.error('Error creating common room:', error)
     return NextResponse.json({ error: 'Failed to create common room' }, { status: 500 })
   }

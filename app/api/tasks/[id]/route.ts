@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server'
 import { getDB } from '../../../../lib/db'
+import { requireUserId } from '@/lib/auth'
 
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
   try {
+    const userId = await requireUserId()
     const db = await getDB()
     const body = await req.json()
     const fields = ['title', 'assignee', 'due', 'status'] as const
@@ -29,6 +31,9 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     
     return NextResponse.json({ success: true, task })
   } catch (error) {
+    if (error instanceof Error && error.message === 'UNAUTHORIZED') {
+      return NextResponse.json({ error: 'unauthorized', hint: 'Sign in to continue' }, { status: 401 })
+    }
     console.error('Error updating task:', error)
     return NextResponse.json({ error: 'Failed to update task' }, { status: 500 })
   }

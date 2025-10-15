@@ -247,7 +247,53 @@ export async function getDB(): Promise<DB> {
         status text default 'todo',
         created_at text
       );
+      create table if not exists proofs (
+        id text primary key,
+        need_id text,
+        room_id text,
+        plan_id text,
+        kind text,
+        url text,
+        text text,
+        created_by text,
+        created_at text
+      );
+      create table if not exists stories (
+        id text primary key,
+        plan_id text,
+        room_id text,
+        title text,
+        body text,
+        gi_delta_planet real,
+        gi_delta_people real,
+        gi_delta_democracy real,
+        gi_delta_learning real,
+        created_at text
+      );
+      create table if not exists gi_scores (
+        id text primary key,
+        date text,
+        planet real,
+        people real,
+        democracy real,
+        learning real,
+        source text,
+        room_id text,
+        plan_id text
+      );
     `)
+    
+    // Add source_key column if missing (SQLite doesn't support IF NOT EXISTS for ALTER TABLE)
+    try {
+      const cols = db.prepare("PRAGMA table_info(signals_top)").all()
+      const hasSourceKey = cols.some((c: any) => c.name === 'source_key')
+      if (!hasSourceKey) {
+        db.exec('alter table signals_top add column source_key text')
+      }
+      db.exec('create unique index if not exists idx_signals_source_key on signals_top(source_key)')
+    } catch (e) {
+      console.log('Note: source_key column may already exist')
+    }
     
     // Seed with sample data if tables are empty
     const signalCount = db.prepare('select count(*) as count from signals_top').get() as { count: number }
@@ -340,7 +386,45 @@ export async function getDB(): Promise<DB> {
         status text default 'todo',
         created_at text
       );
+      create table if not exists proofs (
+        id text primary key,
+        need_id text,
+        room_id text,
+        plan_id text,
+        kind text,
+        url text,
+        text text,
+        created_by text,
+        created_at text
+      );
+      create table if not exists stories (
+        id text primary key,
+        plan_id text,
+        room_id text,
+        title text,
+        body text,
+        gi_delta_planet float,
+        gi_delta_people float,
+        gi_delta_democracy float,
+        gi_delta_learning float,
+        created_at text
+      );
+      create table if not exists gi_scores (
+        id text primary key,
+        date text,
+        planet float,
+        people float,
+        democracy float,
+        learning float,
+        source text,
+        room_id text,
+        plan_id text
+      );
     `
+    
+    // Add source_key column and unique index (Postgres supports IF NOT EXISTS)
+    await sql`alter table signals_top add column if not exists source_key text`
+    await sql`create unique index if not exists idx_signals_source_key on signals_top(source_key)`
     
     return {
       all: async <T = Row>(s: string, p: any[] = []) => (await sql.query(s, p)) as T[],
@@ -357,6 +441,9 @@ export async function getDB(): Promise<DB> {
       if (query.includes('frictions')) return sampleData.frictions as T[]
       if (query.includes('common_rooms')) return sampleData.common_rooms as T[]
       if (query.includes('tasks')) return sampleData.tasks as T[]
+      if (query.includes('proofs')) return [] as T[]
+      if (query.includes('stories')) return [] as T[]
+      if (query.includes('gi_scores')) return [] as T[]
       return [] as T[]
     },
     get: async <T = Row>(query: string) => {

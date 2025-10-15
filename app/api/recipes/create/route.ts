@@ -1,12 +1,14 @@
 import { NextResponse } from 'next/server'
 import { getDB } from '../../../../lib/db'
 import { randomUUID } from 'crypto'
+import { requireUserId } from '@/lib/auth'
 
 // -- Optionally connect to OpenAI or use mock --
 const USE_OPENAI = !!process.env.OPENAI_API_KEY
 
 export async function POST(req: Request) {
   try {
+    const userId = await requireUserId()
     const db = await getDB()
     const body = await req.json()
 
@@ -120,6 +122,9 @@ Use plain, uplifting language.
       plan,
     })
   } catch (error) {
+    if (error instanceof Error && error.message === 'UNAUTHORIZED') {
+      return NextResponse.json({ error: 'unauthorized', hint: 'Sign in to continue' }, { status: 401 })
+    }
     console.error('Error creating recipe:', error)
     return NextResponse.json({ error: 'Failed to create recipe' }, { status: 500 })
   }

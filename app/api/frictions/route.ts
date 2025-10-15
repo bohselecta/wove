@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getDB } from '../../../lib/db'
 import { randomUUID } from 'crypto'
+import { requireUserId } from '../../../lib/auth'
 
 export async function GET() {
   try {
@@ -16,14 +17,18 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
+    const userId = await requireUserId()
     const body = await req.json()
     const text = String(body?.text ?? '').slice(0, 500)
     const item = { id: randomUUID(), text, createdAt: new Date().toISOString() }
     const db = await getDB()
-    await db.run(`insert into frictions (id, text, createdAt) values (@id, @text, @createdAt)`, [item.id, item.text, item.createdAt])
+    await db.run(`insert into frictions (id, text, createdAt) values (?, ?, ?)`, [item.id, item.text, item.createdAt])
     if (db.close) db.close()
     return NextResponse.json(item)
   } catch (error) {
+    if (error instanceof Error && error.message === 'UNAUTHORIZED') {
+      return NextResponse.json({ error: 'unauthorized', hint: 'Sign in to continue' }, { status: 401 })
+    }
     console.error('Error creating friction:', error)
     return NextResponse.json({ error: 'Failed to create friction' }, { status: 500 })
   }

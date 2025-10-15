@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
+import RoomProofs from '../../components/RoomProofs'
 
 type Room = { id:string; title:string; plan_id?:string; status:string; created_at:string }
 type Task = { id:string; room_id:string; title:string; status:string; assignee?:string|null; due?:string|null; created_at:string }
@@ -92,6 +93,7 @@ export default function CommonsPage() {
             <button className="badge" onClick={()=>loadTasks(r.id)}>Load Tasks</button>
           </div>
           <RoomTasks roomId={r.id} tasks={tasks[r.id] || []} onAdd={addTask} onToggle={toggleTask}/>
+          <RoomProofs roomId={r.id} />
         </div>
       ))}
     </div>
