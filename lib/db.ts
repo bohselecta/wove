@@ -299,9 +299,9 @@ export async function getDB(): Promise<DB> {
     }
     
     return {
-      all: async (sql, params = []) => db.prepare(sql).all(params),
-      get: async (sql, params = []) => db.prepare(sql).get(params),
-      run: async (sql, params = []) => { db.prepare(sql).run(params) },
+      all: async <T = Row>(sql: string, params: any[] = []) => db.prepare(sql).all(params) as T[],
+      get: async <T = Row>(sql: string, params: any[] = []) => db.prepare(sql).get(params) as T | undefined,
+      run: async (sql: string, params: any[] = []) => { db.prepare(sql).run(params) },
       close: () => db.close(),
     }
   }
@@ -312,7 +312,7 @@ export async function getDB(): Promise<DB> {
     const sql = neon(POSTGRES_URL)
     
     // Bootstrap tables (idempotent)
-    await sql(`
+    await sql`
       create table if not exists signals_top (
         id text primary key, source text, topic text, time text, claim text,
         gi_planet float, gi_people float, gi_democracy float, gi_learning float
@@ -340,17 +340,17 @@ export async function getDB(): Promise<DB> {
         status text default 'todo',
         created_at text
       );
-    `)
+    `
     
     return {
-      all: async <T = Row>(s: string, p: any[] = []) => (await sql(s, p)) as T[],
-      get: async <T = Row>(s: string, p: any[] = []) => ((await sql(s, p)) as T[])[0],
-      run: async (s: string, p: any[] = []) => { await sql(s, p) },
+      all: async <T = Row>(s: string, p: any[] = []) => (await sql.query(s, p)) as T[],
+      get: async <T = Row>(s: string, p: any[] = []) => ((await sql.query(s, p)) as T[])[0],
+      run: async (s: string, p: any[] = []) => { await sql.query(s, p) },
     }
   }
 
   // Fallback: return mock database for development
-  return {
+  const mockDb = {
     all: async <T = Row>(query: string) => {
       if (query.includes('signals_top')) return sampleData.signals_top as T[]
       if (query.includes('recipes')) return sampleData.recipes as T[]
@@ -360,7 +360,7 @@ export async function getDB(): Promise<DB> {
       return [] as T[]
     },
     get: async <T = Row>(query: string) => {
-      const results = await this.all<T>(query)
+      const results = await mockDb.all<T>(query)
       return results[0]
     },
     run: async (query: string) => {
@@ -368,4 +368,6 @@ export async function getDB(): Promise<DB> {
       console.log('Mock DB run:', query)
     },
   }
+  
+  return mockDb
 }
