@@ -1,6 +1,7 @@
 import './globals.css'
 import type { Metadata } from 'next'
 import Image from 'next/image'
+import Navigation from '../components/Navigation'
 
 export const metadata: Metadata = {
   title: "Wove — The Living Loom",
@@ -23,16 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 priority
               />
             </div>
-            <nav className="flex gap-4 text-sm">
-              <a href="/" className="hover:underline">The Loom</a>
-              <a href="/dashboard" className="hover:underline">Dashboard</a>
-              <a href="/library" className="hover:underline">The Library</a>
-              <a href="/workshop" className="hover:underline">The Workshop</a>
-              <a href="/commons" className="hover:underline">The Commons</a>
-              <a href="/park" className="hover:underline">The Park</a>
-              <a href="/bank" className="hover:underline">The Bank</a>
-              <a href="/observatory" className="hover:underline">The Observatory</a>
-            </nav>
+            <Navigation />
           </div>
         </header>
         <main className="mx-auto max-w-6xl px-4 py-6">{children}</main>
