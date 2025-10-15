@@ -26,7 +26,7 @@ export default function Navigation() {
         onClick={toggleMenu}
         className="relative z-50 flex flex-col items-center justify-center w-8 h-8 space-y-1 focus:outline-none focus:ring-2 focus:ring-white/20 rounded"
         aria-label="Toggle navigation menu"
-        aria-expanded={isOpen}
+        aria-expanded={isOpen ? 'true' : 'false'}
       >
         <span
           className={`block w-6 h-0.5 bg-white transition-all duration-300 ease-in-out ${
@@ -78,7 +78,7 @@ export default function Navigation() {
           <div className="mt-auto pb-8">
             <div className="border-t border-white/10 pt-6">
               <p className="text-sm text-white/70 px-4">
-                Navigate through Wove's civic districts
+                Navigate through Wove&apos;s civic districts
               </p>
             </div>
           </div>
