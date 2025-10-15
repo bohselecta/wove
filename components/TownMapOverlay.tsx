@@ -4,13 +4,13 @@ import Link from 'next/link'
 /** Overlay uses a 1600x900 viewBox. Positions match the hero render. */
 export default function TownMapOverlay() {
   return (
-    <svg
-      viewBox="0 0 1600 900"
-      className="absolute inset-0 w-full h-full"
-      aria-label="Interactive navigation overlay for Wove"
-      role="img"
-      preserveAspectRatio="xMidYMid slice"
-    >
+            <svg
+              viewBox="0 0 1600 900"
+              className="absolute inset-0 w-full h-full"
+              preserveAspectRatio="xMidYMid slice"
+              aria-label="Interactive navigation overlay for Wove"
+              role="img"
+            >
       <style>{`
         .label { fill: #fff; font: 600 20px/1.2 Inter, system-ui, sans-serif; paint-order: stroke; stroke: rgba(0,0,0,.35); stroke-width: 3; }
         .dot  { fill: #fff; stroke: #ffffffaa; stroke-width: 3; }
@@ -34,16 +34,30 @@ export default function TownMapOverlay() {
                 { x: 970,  y: 630,  href: '/bank' as const,         text: 'Bank' },
                 { x: 740,  y: 560,  href: '/' as const,             text: 'The Loom' },
               ].map(({ x, y, href, text }) => (
-        <Link key={href} href={href} aria-label={text}>
-          {/* group preserves keyboard focus in Safari/iOS */}
-          <g transform={`translate(${x},${y})`} className="cursor-pointer">
-            <circle className="halo" r="22" />
-            <circle className="ring pulse" r="18" />
-            <circle className="dot" r="8" />
-            <text className="label" x="22" y="8">{text}</text>
-          </g>
-        </Link>
-      ))}
-    </svg>
+                <Link key={href} href={href} aria-label={text}>
+                  {/* group preserves keyboard focus in Safari/iOS */}
+                  <g transform={`translate(${x},${y})`} className="cursor-pointer">
+                    <circle className="halo" r="22" />
+                    <circle className="ring pulse" r="18" />
+                    <circle className="dot" r="8" />
+                    <text className="label" x="22" y="8">{text}</text>
+                  </g>
+                </Link>
+              ))}
+
+              {/* DEV: click to log coordinates in viewBox space - TODO: remove after placing dots */}
+              <rect
+                x="0" y="0" width="1600" height="900"
+                fill="transparent"
+                onClick={(e) => {
+                  const svg = e.currentTarget.ownerSVGElement!;
+                  const pt = svg.createSVGPoint();
+                  pt.x = e.clientX; pt.y = e.clientY;
+                  const ctm = svg.getScreenCTM()!.inverse();
+                  const p = pt.matrixTransform(ctm);
+                  console.log(`{ x: ${Math.round(p.x)}, y: ${Math.round(p.y)} }`);
+                }}
+              />
+            </svg>
   )
 }
