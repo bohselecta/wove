@@ -14,8 +14,18 @@ export default function CommonsPage() {
   useEffect(() => { 
     fetch('/api/common_rooms')
       .then(r => r.json())
-      .then(setRooms)
-      .catch(console.error)
+      .then(data => {
+        if (Array.isArray(data)) {
+          setRooms(data)
+        } else {
+          console.error('Invalid data format:', data)
+          setRooms([])
+        }
+      })
+      .catch(err => {
+        console.error('Failed to load rooms:', err)
+        setRooms([])
+      })
   }, [])
 
   async function createRoom() {
@@ -31,9 +41,19 @@ export default function CommonsPage() {
   }
 
   async function loadTasks(roomId: string) {
-    const res = await fetch(`/api/common_rooms/${roomId}/tasks`)
-    const list = await res.json()
-    setTasks(prev => ({ ...prev, [roomId]: list }))
+    try {
+      const res = await fetch(`/api/common_rooms/${roomId}/tasks`)
+      const list = await res.json()
+      if (Array.isArray(list)) {
+        setTasks(prev => ({ ...prev, [roomId]: list }))
+      } else {
+        console.error('Invalid tasks data:', list)
+        setTasks(prev => ({ ...prev, [roomId]: [] }))
+      }
+    } catch (err) {
+      console.error('Failed to load tasks:', err)
+      setTasks(prev => ({ ...prev, [roomId]: [] }))
+    }
   }
 
   async function addTask(roomId: string, text: string) {
