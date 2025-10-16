@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Observatory } from '../../../components/Observatory'
 import { GuidanceEngine } from '../../../components/GuidanceEngine'
 import { Loom } from '../../../components/Loom'
+import SectionHeader from '../../../components/SectionHeader'
 import BackButton from '../../../components/BackButton'
 
 type Signal = {

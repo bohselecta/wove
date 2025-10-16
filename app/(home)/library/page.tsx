@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useCallback } from 'react'
 import SectionHeader from '@/components/SectionHeader'
 import BackButton from '@/components/BackButton'
 
@@ -15,14 +15,15 @@ export default function LibraryPage() {
   const [form, setForm] = useState({ title:'', summary:'', content:'', tags:'' })
   const [busy, setBusy] = useState(false)
 
-  async function load() {
+  const load = useCallback(async () => {
     const params = new URLSearchParams()
     if (q) params.set('q', q)
     if (tag) params.set('tag', tag)
     const res = await fetch('/api/library' + (params.toString() ? `?${params}` : ''))
     setLessons(await res.json())
-  }
-  useEffect(() => { load() }, [q, tag])
+  }, [q, tag])
+  
+  useEffect(() => { load() }, [load])
 
   const allTags = useMemo(() => {
     const set = new Set<string>()
