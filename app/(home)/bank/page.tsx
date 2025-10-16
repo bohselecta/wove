@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
+import SectionHeader from '../../../components/SectionHeader'
 
 type Row = { date: string; planet: number; people: number; democracy: number; learning: number }
 type Series = { series: Row[] }
@@ -13,8 +14,15 @@ export default function BankPage() {
   const heartbeat = ((latest.planet + latest.people + latest.democracy + latest.learning) / 4).toFixed(3)
 
   return (
-    <div className="grid gap-6">
-      <section className="card">
+    <>
+      <SectionHeader
+        title="The Bank"
+        subtitle="Good Index (GI) heartbeat—Planet, People, Democracy, Learning."
+        image="/images/headers/bank.jpg"
+      />
+      <main className="mx-auto max-w-6xl px-4 py-6">
+      <div className="grid gap-6">
+        <section className="card">
         <h1 className="text-2xl font-display mb-2">The Bank — Good Index (GI) • Heartbeat</h1>
         <p className="opacity-80">Daily deltas derived from Stories and activity.</p>
         <div className="mt-3 text-sm">Current Heartbeat: <span className="badge">{heartbeat}</span></div>
@@ -26,7 +34,9 @@ export default function BankPage() {
         <MetricCard title="Democracy" rows={rows} keyName="democracy" />
         <MetricCard title="Learning" rows={rows} keyName="learning" />
       </section>
-    </div>
+      </div>
+      </main>
+    </>
   )
 }
 

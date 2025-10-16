@@ -8,9 +8,17 @@
 }
 
 html, body {
-  height: 100%;
   background: var(--bg);
   color: var(--ink);
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+#__next {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .card {
@@ -23,12 +31,15 @@ html, body {
   @apply grid gap-4;
 }
 
-/* Floating Logo Animation */
-@keyframes float {
-  0%, 100% { 
-    transform: translateY(0px); 
-  }
-  50% { 
-    transform: translateY(-8px); 
-  }
+/* Section Header Styles */
+.section-header {
+  background-image: var(--bg-image);
+  background-size: cover;
+  background-position: center;
+}
+
+/* Click Logger for Development */
+.click-logger {
+  pointer-events: auto;
+  z-index: 10;
 }

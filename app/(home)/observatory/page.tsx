@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { Observatory } from '../../components/Observatory'
+import { Observatory } from '../../../components/Observatory'
+import SectionHeader from '../../../components/SectionHeader'
 
 export default function ObservatoryPage() {
   const [isIngesting, setIsIngesting] = useState(false)
@@ -29,29 +30,36 @@ export default function ObservatoryPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="card">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-display mb-2">The Observatory — Trusted Global Patterns</h1>
-            <p className="opacity-80">Live map of verified signals from trusted sources worldwide.</p>
-          </div>
-          <div className="flex flex-col items-end gap-2">
-            <button
-              onClick={handleIngest}
-              disabled={isIngesting}
-              className="badge hover:bg-white/15 transition-colors disabled:opacity-50"
-            >
-              {isIngesting ? 'Ingesting...' : 'Refresh Signals'}
-            </button>
-            {lastIngest && (
-              <span className="text-xs opacity-70">
-                Last updated: {lastIngest}
-              </span>
-            )}
+    <>
+      <SectionHeader
+        title="The Observatory"
+        subtitle="Trusted global patterns—fresh signals, filter by what matters."
+        image="/images/headers/observatory.jpg"
+      />
+      <main className="mx-auto max-w-6xl px-4 py-6">
+      <div className="space-y-6">
+        <div className="card">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-display mb-2">The Observatory — Trusted Global Patterns</h1>
+              <p className="opacity-80">Live map of verified signals from trusted sources worldwide.</p>
+            </div>
+            <div className="flex flex-col items-end gap-2">
+              <button
+                onClick={handleIngest}
+                disabled={isIngesting}
+                className="badge hover:bg-white/15 transition-colors disabled:opacity-50"
+              >
+                {isIngesting ? 'Ingesting...' : 'Refresh Signals'}
+              </button>
+              {lastIngest && (
+                <span className="text-xs opacity-70">
+                  Last updated: {lastIngest}
+                </span>
+              )}
+            </div>
           </div>
         </div>
-      </div>
 
       <div className="card">
         <h2 className="text-xl font-display mb-4">Live Signal Feed</h2>
@@ -77,6 +85,8 @@ export default function ObservatoryPage() {
           </p>
         </div>
       </div>
-    </div>
+      </div>
+      </main>
+    </>
   )
 }

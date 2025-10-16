@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
+import SectionHeader from '../../../components/SectionHeader'
 
 type Story = {
   id: string; plan_id?: string|null; room_id?: string|null;
@@ -31,12 +32,20 @@ export default function ParkPage() {
   }
 
   return (
-    <div className="grid gap-6">
-      <section className="card">
+    <>
+      <SectionHeader
+        title="The Park"
+        subtitle="Stories & celebrations of progress—turn threads into narratives."
+        image="/images/headers/park.jpg"
+      />
+      <main className="mx-auto max-w-6xl px-4 py-6">
+      <div className="grid gap-6">
+        <section className="card">
         <h1 className="text-2xl font-display mb-2">The Park — Stories & Celebrations</h1>
         <div className="flex items-center gap-3">
           <select className="rounded-xl bg-white/5 border border-white/10 px-3 py-2"
-                  value={selectedRoom} onChange={e=>setSelectedRoom(e.target.value)}>
+                  value={selectedRoom} onChange={e=>setSelectedRoom(e.target.value)}
+                  aria-label="Select a common room">
             <option value="">Choose a Common Room…</option>
             {rooms.map(r => <option key={r.id} value={r.id}>{r.title}</option>)}
           </select>
@@ -64,6 +73,8 @@ export default function ParkPage() {
         ))}
         {stories.length===0 && <div className="opacity-70">No stories yet — create one from a Common Room.</div>}
       </section>
-    </div>
+      </div>
+      </main>
+    </>
   )
 }

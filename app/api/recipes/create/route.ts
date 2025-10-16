@@ -3,6 +3,15 @@ import { getDB } from '../../../../lib/db'
 import { randomUUID } from 'crypto'
 import { requireUserId } from '@/lib/auth'
 
+type CreateBody = {
+  title?: string
+  summary?: string
+  needId?: string
+  lessonIds?: string[]
+  needText?: string
+  selectedSignals?: any[]
+}
+
 // -- Optionally connect to OpenAI or use mock --
 const USE_OPENAI = !!process.env.OPENAI_API_KEY
 
@@ -10,7 +19,19 @@ export async function POST(req: Request) {
   try {
     const userId = await requireUserId()
     const db = await getDB()
-    const body = await req.json()
+    const body = (await req.json()) as CreateBody
+    const now = new Date().toISOString()
+    const lessonIds = Array.isArray(body.lessonIds) ? body.lessonIds : []
+
+    // Pull lessons as optional context
+    let lessonsCtx = ''
+    if (lessonIds.length) {
+      const qs = `select title, summary, content, tags from library_lessons where id in (${lessonIds.map(()=>'?').join(',')})`
+      const rows = await db.all<any>(qs, lessonIds)
+      lessonsCtx = rows
+        .map(r => `# ${r.title}\nTags: ${r.tags}\n${r.summary || ''}\n\n${r.content || ''}`)
+        .join('\n\n---\n\n')
+    }
 
     const { needText, selectedSignals = [] } = body
 
@@ -50,7 +71,10 @@ ${needText}
 Relevant Signals:
 ${signalContext}
 
-Generate a single Weave Plan that addresses this need and leverages these signals.
+${lessonsCtx ? `Supporting lessons (optional):
+${lessonsCtx}
+
+` : ''}Generate a single Weave Plan that addresses this need and leverages these signals.
 Use plain, uplifting language.
 `
 
@@ -93,17 +117,26 @@ Use plain, uplifting language.
       }
     }
 
-    const { title, summary, impact, feasibility, urgency, equity } = plan
+    let { title, summary, impact, feasibility, urgency, equity } = plan
+
+    // Mock bump if lessons present (works with or without OpenAI)
+    if (lessonIds.length) {
+      impact = Math.min(1, impact + 0.06)
+      feasibility = Math.min(1, feasibility + 0.04)
+      urgency = Math.min(1, urgency + 0.03)
+      equity = Math.min(1, equity + 0.06)
+    }
 
     const total = (impact + feasibility + urgency + equity) / 4
+    const planId = randomUUID()
 
     // 3️⃣ Store the new Weave Plan in database
     await db.run(
       `insert into recipes
-       (id, title, summary, p_impact, p_feasibility, p_urgency, p_equity, p_total)
-       values (?, ?, ?, ?, ?, ?, ?, ?)`,
+       (id, title, summary, p_impact, p_feasibility, p_urgency, p_equity, p_total, template_id)
+       values (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        randomUUID(),
+        planId,
         title,
         summary,
         impact,
@@ -111,6 +144,7 @@ Use plain, uplifting language.
         urgency,
         equity,
         total,
+        lessonIds.length ? `lessons:${lessonIds.join(',')}` : null
       ]
     )
 
@@ -119,7 +153,8 @@ Use plain, uplifting language.
     // 4️⃣ Respond with the created plan
     return NextResponse.json({
       success: true,
-      plan,
+      planId,
+      lessonIds
     })
   } catch (error) {
     if (error instanceof Error && error.message === 'UNAUTHORIZED') {

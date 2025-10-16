@@ -229,7 +229,8 @@ export async function getDB(): Promise<DB> {
       );
       create table if not exists recipes (
         id text primary key, title text, summary text,
-        p_impact real, p_feasibility real, p_urgency real, p_equity real, p_total real
+        p_impact real, p_feasibility real, p_urgency real, p_equity real, p_total real,
+        template_id text
       );
       create table if not exists common_rooms (
         id text primary key,
@@ -244,6 +245,8 @@ export async function getDB(): Promise<DB> {
         title text not null,
         assignee text,
         due text,
+        due_date text,
+        priority text,
         status text default 'todo',
         created_at text
       );
@@ -281,6 +284,25 @@ export async function getDB(): Promise<DB> {
         room_id text,
         plan_id text
       );
+      create table if not exists library_lessons (
+        id text primary key,
+        title text not null,
+        summary text,
+        content text,
+        tags text,
+        created_at text,
+        created_by text
+      );
+      create table if not exists nudges (
+        id text primary key,
+        room_id text,
+        task_id text,
+        assignee text,
+        reason text,
+        created_by text,
+        created_at text,
+        status text
+      );
     `)
     
     // Add source_key column if missing (SQLite doesn't support IF NOT EXISTS for ALTER TABLE)
@@ -293,6 +315,32 @@ export async function getDB(): Promise<DB> {
       db.exec('create unique index if not exists idx_signals_source_key on signals_top(source_key)')
     } catch (e) {
       console.log('Note: source_key column may already exist')
+    }
+    
+    // Add template_id column if missing
+    try {
+      const cols = db.prepare("PRAGMA table_info(recipes)").all()
+      const hasTemplateId = cols.some((c: any) => c.name === 'template_id')
+      if (!hasTemplateId) {
+        db.exec('alter table recipes add column template_id text')
+      }
+    } catch (e) {
+      console.log('Note: template_id column may already exist')
+    }
+    
+    // Add new task columns if missing
+    try {
+      const cols = db.prepare("PRAGMA table_info(tasks)").all()
+      const hasDueDate = cols.some((c: any) => c.name === 'due_date')
+      const hasPriority = cols.some((c: any) => c.name === 'priority')
+      if (!hasDueDate) {
+        db.exec('alter table tasks add column due_date text')
+      }
+      if (!hasPriority) {
+        db.exec('alter table tasks add column priority text')
+      }
+    } catch (e) {
+      console.log('Note: task columns may already exist')
     }
     
     // Seed with sample data if tables are empty
@@ -368,7 +416,8 @@ export async function getDB(): Promise<DB> {
       );
       create table if not exists recipes (
         id text primary key, title text, summary text,
-        p_impact float, p_feasibility float, p_urgency float, p_equity float, p_total float
+        p_impact float, p_feasibility float, p_urgency float, p_equity float, p_total float,
+        template_id text
       );
       create table if not exists common_rooms (
         id text primary key,
@@ -383,6 +432,8 @@ export async function getDB(): Promise<DB> {
         title text not null,
         assignee text,
         due text,
+        due_date text,
+        priority text,
         status text default 'todo',
         created_at text
       );
@@ -420,11 +471,28 @@ export async function getDB(): Promise<DB> {
         room_id text,
         plan_id text
       );
+      create table if not exists nudges (
+        id text primary key,
+        room_id text,
+        task_id text,
+        assignee text,
+        reason text,
+        created_by text,
+        created_at text,
+        status text
+      );
     `
     
     // Add source_key column and unique index (Postgres supports IF NOT EXISTS)
     await sql`alter table signals_top add column if not exists source_key text`
     await sql`create unique index if not exists idx_signals_source_key on signals_top(source_key)`
+    
+    // Add template_id column if missing
+    await sql`alter table recipes add column if not exists template_id text`
+    
+    // Add new task columns if missing
+    await sql`alter table tasks add column if not exists due_date text`
+    await sql`alter table tasks add column if not exists priority text`
     
     return {
       all: async <T = Row>(s: string, p: any[] = []) => (await sql.query(s, p)) as T[],

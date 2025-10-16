@@ -1,0 +1,13 @@
+[
+  {
+    "id": "shade-sprint",
+    "title": "Shade Sprint — Cooler Walkways",
+    "summary": "Refined copy: focus on school routes & seniors' paths.",
+    "tags": ["climate", "health", "public-space"],
+    "defaultPlan": {
+      "title": "Shade Sprint — Cooler Walkways",
+      "summary": "Map hotspots near schools/senior centers; native canopy; hydration stations.",
+      "ifue": { "impact": 0.84, "feasibility": 0.7, "urgency": 0.78, "equity": 0.82 }
+    }
+  }
+]

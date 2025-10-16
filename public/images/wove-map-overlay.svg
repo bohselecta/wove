@@ -1,0 +1,186 @@
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-labelledby="title desc" role="img" preserveAspectRatio="xMidYMid slice">
+  <title id="title">Wove — Town Navigation Overlay</title>
+  <desc id="desc">Hotspots for the Observatory, Library, The Wove, Bank, Park, Commons, and Workshop.</desc>
+
+  <style>
+    .hotspot { cursor: pointer; }
+    .halo { fill: transparent; }                       /* 44px+ hit area */
+    .ring  { fill: none; stroke: rgba(255,255,255,.95); stroke-width: 2; opacity: .95; }
+    .dot   { fill: #fff; stroke: rgba(0,0,0,.45); stroke-width: 3; }
+    .label { fill: #fff; font: 600 16px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, sans-serif;
+             paint-order: stroke; stroke: rgba(0,0,0,.55); stroke-width: 2; }
+    /* Mobile: keep dots, hide labels, keep a11y via aria-labels */
+    @media (max-width: 700px) { .label { display: none; } }
+  </style>
+
+  <!-- NOTE: Coordinates assume 1600x900 composition; they're good starting points for your new hero.
+       If your crop shifts slightly, use the click-logger below to nudge them in a minute. -->
+
+  <!-- Observatory (hill-top dome, left ridge) -->
+  <a href="/observatory" aria-label="Go to the Observatory">
+    <g class="hotspot" transform="translate(220,200)" tabindex="0">
+      <circle class="halo" r="28"/>
+      <circle class="ring" r="18">
+        <animateTransform
+          attributeName="transform"
+          type="scale"
+          values="1;1.25;1"
+          dur="2.4s"
+          repeatCount="indefinite"
+        />
+        <animate
+          attributeName="opacity"
+          values="0.95;0.2;0.95"
+          dur="2.4s"
+          repeatCount="indefinite"
+        />
+      </circle>
+      <circle class="dot"  r="8"/>
+      <text class="label" x="22" y="8">Observatory</text>
+    </g>
+  </a>
+
+  <!-- Library (left-middle terrace building) -->
+  <a href="/library" aria-label="Go to the Library">
+    <g class="hotspot" transform="translate(520,430)" tabindex="0">
+      <circle class="halo" r="28"/>
+      <circle class="ring" r="18">
+        <animateTransform
+          attributeName="transform"
+          type="scale"
+          values="1;1.25;1"
+          dur="2.4s"
+          repeatCount="indefinite"
+        />
+        <animate
+          attributeName="opacity"
+          values="0.95;0.2;0.95"
+          dur="2.4s"
+          repeatCount="indefinite"
+        />
+      </circle>
+      <circle class="dot"  r="8"/>
+      <text class="label" x="22" y="8">Library</text>
+    </g>
+  </a>
+
+  <!-- The Wove (central civic building) -->
+  <a href="/" aria-label="Go to The Wove">
+    <g class="hotspot" transform="translate(800,520)" tabindex="0">
+      <circle class="halo" r="28"/>
+      <circle class="ring" r="18">
+        <animateTransform
+          attributeName="transform"
+          type="scale"
+          values="1;1.25;1"
+          dur="2.4s"
+          repeatCount="indefinite"
+        />
+        <animate
+          attributeName="opacity"
+          values="0.95;0.2;0.95"
+          dur="2.4s"
+          repeatCount="indefinite"
+        />
+      </circle>
+      <circle class="dot"  r="8"/>
+      <text class="label" x="22" y="8">The Wove</text>
+    </g>
+  </a>
+
+  <!-- Bank (right-center small building along path) -->
+  <a href="/bank" aria-label="Go to the Bank">
+    <g class="hotspot" transform="translate(980,610)" tabindex="0">
+      <circle class="halo" r="28"/>
+      <circle class="ring" r="18">
+        <animateTransform
+          attributeName="transform"
+          type="scale"
+          values="1;1.25;1"
+          dur="2.4s"
+          repeatCount="indefinite"
+        />
+        <animate
+          attributeName="opacity"
+          values="0.95;0.2;0.95"
+          dur="2.4s"
+          repeatCount="indefinite"
+        />
+      </circle>
+      <circle class="dot"  r="8"/>
+      <text class="label" x="22" y="8">Bank</text>
+    </g>
+  </a>
+
+  <!-- Park (right-bottom near wide path/fountain zone) -->
+  <a href="/park" aria-label="Go to the Park">
+    <g class="hotspot" transform="translate(1120,720)" tabindex="0">
+      <circle class="halo" r="28"/>
+      <circle class="ring" r="18">
+        <animateTransform
+          attributeName="transform"
+          type="scale"
+          values="1;1.25;1"
+          dur="2.4s"
+          repeatCount="indefinite"
+        />
+        <animate
+          attributeName="opacity"
+          values="0.95;0.2;0.95"
+          dur="2.4s"
+          repeatCount="indefinite"
+        />
+      </circle>
+      <circle class="dot"  r="8"/>
+      <text class="label" x="22" y="8">Park</text>
+    </g>
+  </a>
+
+  <!-- Commons (bottom-center near fountain junction) -->
+  <a href="/commons" aria-label="Go to the Commons">
+    <g class="hotspot" transform="translate(650,760)" tabindex="0">
+      <circle class="halo" r="28"/>
+      <circle class="ring" r="18">
+        <animateTransform
+          attributeName="transform"
+          type="scale"
+          values="1;1.25;1"
+          dur="2.4s"
+          repeatCount="indefinite"
+        />
+        <animate
+          attributeName="opacity"
+          values="0.95;0.2;0.95"
+          dur="2.4s"
+          repeatCount="indefinite"
+        />
+      </circle>
+      <circle class="dot"  r="8"/>
+      <text class="label" x="22" y="8">Commons</text>
+    </g>
+  </a>
+
+  <!-- Workshop (bottom-left neighborhood) -->
+  <a href="/workshop" aria-label="Go to the Workshop">
+    <g class="hotspot" transform="translate(230,690)" tabindex="0">
+      <circle class="halo" r="28"/>
+      <circle class="ring" r="18">
+        <animateTransform
+          attributeName="transform"
+          type="scale"
+          values="1;1.25;1"
+          dur="2.4s"
+          repeatCount="indefinite"
+        />
+        <animate
+          attributeName="opacity"
+          values="0.95;0.2;0.95"
+          dur="2.4s"
+          repeatCount="indefinite"
+        />
+      </circle>
+      <circle class="dot"  r="8"/>
+      <text class="label" x="22" y="8">Workshop</text>
+    </g>
+  </a>
+</svg>

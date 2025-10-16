@@ -1,9 +1,10 @@
 'use client'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import { Observatory } from '../../components/Observatory'
-import { GuidanceEngine } from '../../components/GuidanceEngine'
-import { Loom } from '../../components/Loom'
+import { Observatory } from '../../../components/Observatory'
+import { GuidanceEngine } from '../../../components/GuidanceEngine'
+import { Loom } from '../../../components/Loom'
+import SectionHeader from '../../../components/SectionHeader'
 
 type Signal = {
   id: string
@@ -23,19 +24,23 @@ type Friction = {
 export default function DashboardPage() {
   const [signals, setSignals] = useState<Signal[]>([])
   const [frictions, setFrictions] = useState<Friction[]>([])
+  const [allLessons, setAllLessons] = useState<any[]>([])
   const [selectedNeed, setSelectedNeed] = useState<string>('')
   const [selectedSignals, setSelectedSignals] = useState<string[]>([])
+  const [selectedLessonIds, setSelectedLessonIds] = useState<string[]>([])
   const [isCreatingPlan, setIsCreatingPlan] = useState(false)
   const [showPlanForm, setShowPlanForm] = useState(false)
 
   useEffect(() => {
-    // Fetch signals and frictions for plan creation
+    // Fetch signals, frictions, and lessons for plan creation
     Promise.all([
       fetch('/api/signals/top').then(r => r.json()),
-      fetch('/api/frictions').then(r => r.json())
-    ]).then(([signalsData, frictionsData]) => {
+      fetch('/api/frictions').then(r => r.json()),
+      fetch('/api/library').then(r => r.json())
+    ]).then(([signalsData, frictionsData, lessonsData]) => {
       setSignals(signalsData)
       setFrictions(frictionsData)
+      setAllLessons(lessonsData)
     }).catch(console.error)
   }, [])
 
@@ -52,7 +57,8 @@ export default function DashboardPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           needId: selectedNeed,
-          signalIds: selectedSignals
+          signalIds: selectedSignals,
+          lessonIds: selectedLessonIds
         })
       })
 
@@ -66,6 +72,7 @@ export default function DashboardPage() {
       // Reset form and refresh page
       setSelectedNeed('')
       setSelectedSignals([])
+      setSelectedLessonIds([])
       setShowPlanForm(false)
       
       // Refresh the page to show new plan
@@ -79,11 +86,18 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="card">
-        <h1 className="text-2xl font-display mb-2">The Wove — Live View</h1>
-        <p className="opacity-80">Monitor patterns, track Weave Plans, and manage your needs.</p>
-      </div>
+    <>
+      <SectionHeader
+        title="Dashboard"
+        subtitle="Live view: Signals → Plans → Rooms—what needs attention now."
+        image="/images/headers/dashboard.jpg"
+      />
+      <main className="mx-auto max-w-6xl px-4 py-6">
+      <div className="space-y-6">
+        <div className="card">
+          <h1 className="text-2xl font-display mb-2">The Wove — Live View</h1>
+          <p className="opacity-80">Monitor patterns, track Weave Plans, and manage your needs.</p>
+        </div>
       
       <div className="grid md:grid-cols-3 gap-6">
         <section className="md:col-span-2 card">
@@ -156,6 +170,22 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
+                <div>
+                  <label className="block text-sm font-medium mb-2">Attach lessons (optional):</label>
+                  <div className="flex flex-wrap gap-2">
+                    {allLessons.slice(0,8).map((l:any)=>{
+                      const on = selectedLessonIds.includes(l.id)
+                      return (
+                        <button key={l.id}
+                          onClick={(e)=>{e.preventDefault(); setSelectedLessonIds(on ? selectedLessonIds.filter(x=>x!==l.id) : [...selectedLessonIds,l.id])}}
+                          className={`badge ${on ? 'bg-white/20' : ''}`}>
+                          {l.title}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+
                 <div className="flex gap-2">
                   <button 
                     onClick={handleCreatePlan}
@@ -182,6 +212,8 @@ export default function DashboardPage() {
           </div>
         </section>
       </div>
-    </div>
+      </div>
+      </main>
+    </>
   )
 }
