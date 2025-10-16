@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import SectionHeader from '../../../components/SectionHeader'
+import BackButton from '../../../components/BackButton'
 
 type Row = { date: string; planet: number; people: number; democracy: number; learning: number }
 type Series = { series: Row[] }
@@ -36,6 +37,7 @@ export default function BankPage() {
       </section>
       </div>
       </main>
+      <BackButton />
     </>
   )
 }

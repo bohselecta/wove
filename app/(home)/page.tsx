@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import TownMap from '../../components/TownMap'
+import LandingHeader from '../../components/LandingHeader'
 
 export default function Home() {
   const [busy, setBusy] = useState(false)
@@ -16,6 +17,9 @@ export default function Home() {
   }
 
   return (
-    <TownMap />
+    <>
+      <LandingHeader />
+      <TownMap />
+    </>
   )
 }

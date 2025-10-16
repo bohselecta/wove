@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import SectionHeader from '../../../components/SectionHeader'
+import BackButton from '../../../components/BackButton'
 
 type Story = {
   id: string; plan_id?: string|null; room_id?: string|null;
@@ -75,6 +76,7 @@ export default function ParkPage() {
       </section>
       </div>
       </main>
+      <BackButton />
     </>
   )
 }

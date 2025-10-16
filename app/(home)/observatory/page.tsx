@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { Observatory } from '../../../components/Observatory'
 import SectionHeader from '../../../components/SectionHeader'
+import BackButton from '../../../components/BackButton'
 
 export default function ObservatoryPage() {
   const [isIngesting, setIsIngesting] = useState(false)
@@ -87,6 +88,7 @@ export default function ObservatoryPage() {
       </div>
       </div>
       </main>
+      <BackButton />
     </>
   )
 }

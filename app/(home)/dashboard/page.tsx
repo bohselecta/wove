@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Observatory } from '../../../components/Observatory'
 import { GuidanceEngine } from '../../../components/GuidanceEngine'
 import { Loom } from '../../../components/Loom'
-import SectionHeader from '../../../components/SectionHeader'
+import BackButton from '../../../components/BackButton'
 
 type Signal = {
   id: string
@@ -92,7 +92,7 @@ export default function DashboardPage() {
         subtitle="Live view: Signals → Plans → Rooms—what needs attention now."
         image="/images/headers/dashboard.jpg"
       />
-      <main className="mx-auto max-w-6xl px-4 py-6">
+      <main className="w-full px-4 py-6">
       <div className="space-y-6">
         <div className="card">
           <h1 className="text-2xl font-display mb-2">The Wove — Live View</h1>
@@ -214,6 +214,7 @@ export default function DashboardPage() {
       </div>
       </div>
       </main>
+      <BackButton />
     </>
   )
 }

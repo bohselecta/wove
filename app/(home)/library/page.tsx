@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useMemo, useState } from 'react'
 import SectionHeader from '@/components/SectionHeader'
+import BackButton from '@/components/BackButton'
 
 type Lesson = {
   id: string; title: string; summary?: string; content?: string;
@@ -56,7 +57,7 @@ export default function LibraryPage() {
         image="/images/headers/library.jpg"
       />
 
-      <div className="mx-auto max-w-6xl px-4 py-4 md:py-6 grid gap-4 md:gap-6">
+      <div className="w-full px-4 py-4 md:py-6 space-y-4 md:space-y-6">
         {/* Filters */}
         <section className="card">
           <div className="grid md:grid-cols-3 gap-3">
@@ -137,6 +138,7 @@ export default function LibraryPage() {
           )}
         </section>
       </div>
+      <BackButton />
     </>
   )
 }

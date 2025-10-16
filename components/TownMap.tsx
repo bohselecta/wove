@@ -1,10 +1,9 @@
 'use client'
 import Image from 'next/image'
 import Link from 'next/link'
-import Navigation from './Navigation'
-import { SignedIn, SignedOut, UserButton, SignInButton } from '@clerk/nextjs'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import TownMapOverlay from './TownMapOverlay'
 
 export default function TownMap() {
   const [busy, setBusy] = useState(false)
@@ -20,41 +19,9 @@ export default function TownMap() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 backdrop-blur bg-black/30 border-b border-white/10">
-        <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center">
-            <Link href="/" className="hover:opacity-80 transition-opacity">
-              <Image
-                src="/images/wove-logo.svg"
-                alt="Wove"
-                width={120}
-                height={32}
-                className="h-8 w-auto"
-                priority
-              />
-            </Link>
-          </div>
-          <div className="flex items-center gap-4">
-            <Navigation />
-            <div className="flex items-center gap-3">
-              <SignedOut>
-                <SignInButton mode="modal">
-                  <button className="rounded-full px-4 py-2 bg-white/10 backdrop-blur border border-white/20 hover:bg-white/15">
-                    Sign In
-                  </button>
-                </SignInButton>
-              </SignedOut>
-              <SignedIn>
-                <UserButton afterSignOutUrl="/" />
-              </SignedIn>
-            </div>
-          </div>
-        </div>
-      </header>
-      
       <section aria-label="Wove town map"
         className="relative w-full max-w-[1600px] mx-auto rounded-2xl overflow-hidden border border-white/10">
-      <div className="relative w-full aspect-[16/9] max-h-[78vh]">
+      <div className="relative w-full h-auto min-h-[400px]">
         <Image
           src="/images/wove-town-hero.jpg"
           alt="Bird's-eye view of Wove nestled in green hills under a mountain horizon"
@@ -65,11 +32,7 @@ export default function TownMap() {
         />
         
         {/* SVG Overlay with all interactive elements */}
-        <object 
-          data="/images/wove-map-overlay.svg" 
-          type="image/svg+xml" 
-          className="absolute inset-0 w-full h-full pointer-events-auto" 
-        />
+        <TownMapOverlay />
         
         <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
         
@@ -88,10 +51,6 @@ export default function TownMap() {
         </div>
       </div>
     </section>
-    
-    <footer className="mx-auto max-w-6xl px-4 h-[50px] flex items-center text-xs opacity-70">
-      <p>© {new Date().getFullYear()} Wove — What we weave is what we wove.</p>
-    </footer>
     </>
   )
 }

@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import RoomProofs from '../../../components/RoomProofs'
 import RoomBadges from '../../../components/RoomBadges'
 import SectionHeader from '../../../components/SectionHeader'
+import BackButton from '../../../components/BackButton'
 
 type Room = { id:string; title:string; plan_id?:string; status:string; created_at:string }
 type Task = { id:string; room_id:string; title:string; status:string; assignee?:string|null; due?:string|null; due_date?:string|null; priority?:string|null; created_at:string }
@@ -129,6 +130,7 @@ export default function CommonsPage() {
       ))}
       </div>
       </main>
+      <BackButton />
     </>
   )
 }

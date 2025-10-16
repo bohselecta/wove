@@ -6,7 +6,7 @@ type Props = {
 
 export default function SectionHeader({ title, subtitle, image }: Props) {
   return (
-    <header className="relative h-[30vh] min-h-[200px] md:h-[40vh] md:min-h-[320px] overflow-hidden flex flex-col justify-end">
+    <header className="relative h-auto min-h-[200px] overflow-hidden flex flex-col justify-end">
       {/* Background Image */}
       {/* eslint-disable-next-line react/forbid-dom-props */}
       <div 

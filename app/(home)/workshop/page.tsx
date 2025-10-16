@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import SectionHeader from '../../../components/SectionHeader'
+import BackButton from '../../../components/BackButton'
 
 type Template = {
   id: string
@@ -46,7 +47,7 @@ export default function WorkshopPage() {
         image="/images/headers/workshop.jpg"
       />
 
-      <main className="mx-auto max-w-6xl px-4 py-4 md:py-6 grid gap-4 md:gap-6">
+      <main className="w-full px-4 py-4 md:py-6 space-y-4 md:space-y-6">
         <section className="card">
           <h2 className="font-display text-lg mb-2">Template Gallery</h2>
           <p className="opacity-80">Start from a proven recipe, then edit the plan in the Guidance Engine and coordinate in a Common Room.</p>
@@ -73,6 +74,7 @@ export default function WorkshopPage() {
           {templates.length===0 && <div className="opacity-70">Loading templates…</div>}
         </section>
       </main>
+      <BackButton />
     </>
   )
 }
