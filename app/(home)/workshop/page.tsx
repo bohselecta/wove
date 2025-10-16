@@ -25,7 +25,7 @@ export default function WorkshopPage() {
     fetch('/api/workshop/templates').then(r => r.json()).then(setTemplates)
   }, [])
 
-  async function useTemplate(t: Template, createRoom = true) {
+  async function applyTemplate(t: Template, createRoom = true) {
     setBusy(t.id)
     const res = await fetch('/api/workshop/use-template', {
       method: 'POST',
@@ -62,10 +62,10 @@ export default function WorkshopPage() {
                 {t.tags.map(tag => <span key={tag} className="badge">{tag}</span>)}
               </div>
               <div className="mt-3 flex gap-2">
-                <button className="badge" disabled={busy===t.id} onClick={()=>useTemplate(t,true)}>
+                <button className="badge" disabled={busy===t.id} onClick={()=>applyTemplate(t,true)}>
                   {busy===t.id ? 'Creating…' : 'Use this template'}
                 </button>
-                <button className="badge" disabled={busy===t.id} onClick={()=>useTemplate(t,false)}>
+                <button className="badge" disabled={busy===t.id} onClick={()=>applyTemplate(t,false)}>
                   {busy===t.id ? 'Working…' : 'Create plan only'}
                 </button>
               </div>

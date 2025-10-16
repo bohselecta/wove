@@ -1,7 +1,7 @@
 export async function requireUserId() {
   try {
     const { auth } = await import('@clerk/nextjs/server')
-    const { userId } = auth()
+    const { userId } = await auth()
     if (!userId) throw new Error('UNAUTHORIZED')
     return userId
   } catch {
